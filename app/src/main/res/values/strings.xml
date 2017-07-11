@@ -13,6 +13,8 @@
     <string name="nav_settings">Settings</string>
     <string name="nav_presence">Cacoprésences</string>
 
+    <string name="cat_empty">Nothing to show</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="placeholder_home">Home</string>
     <string name="placeholder_categories">Categories</string>

@@ -2,6 +2,7 @@ package org.cacophonie.cacompagnon.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -22,6 +23,7 @@ import org.cacophonie.cacompagnon.fragment.CategoriesFragment;
 import org.cacophonie.cacompagnon.fragment.HomeFragment;
 import org.cacophonie.cacompagnon.fragment.MPListFragment;
 import org.cacophonie.cacompagnon.fragment.PresenceFragment;
+import org.cacophonie.cacompagnon.utils.VanillaAPI;
 
 import java.util.EnumMap;
 
@@ -35,6 +37,7 @@ public class MainActivity extends AppCompatActivity
         PRESENCES
     }
     private EnumMap<fragmentKey, Fragment> fragments; // List of the fragments
+    private VanillaAPI api;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,8 +64,14 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         // Create the 1st fragment and display it
-        fragments.put(fragmentKey.HOME, new HomeFragment());
-        getSupportFragmentManager().beginTransaction().replace(R.id.frame, fragments.get(fragmentKey.HOME)).commit();
+        fragments.put(fragmentKey.CATEGORIES, new CategoriesFragment());
+        getSupportFragmentManager().beginTransaction().replace(R.id.frame, fragments.get(fragmentKey.CATEGORIES)).commit();
+
+        api = new VanillaAPI("https://smaiz.fr/vanilla/api");
+    }
+
+    public VanillaAPI getAPI() {
+        return api;
     }
 
     @Override
@@ -144,20 +153,32 @@ public class MainActivity extends AppCompatActivity
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (requestCode == LoginActivity.LOGIN_INTENT_CODE) {
             if (resultCode == RESULT_OK) {
-                // login successful
-                String session = intent.getExtras().getString(LoginActivity.LOGIN_INTENT_SESSION_KEY);
+                // Login successful
+                String cookies = intent.getExtras().getString(LoginActivity.LOGIN_INTENT_SESSION_KEY);
+                api.addSessionCookie(cookies);
+                // Destroy the fragments to force the renewal of their data
+                destroyFragments();
+                // Create a new HomeFragment and display it
+                fragments.put(fragmentKey.HOME, new HomeFragment());
+                getSupportFragmentManager().beginTransaction().replace(R.id.frame, fragments.get(fragmentKey.HOME)).commitAllowingStateLoss();
 
-                // API creation
-
-                // Drawer update
+                /* TODO: Drawer update
+                * For now, ther is a bug ine the API, I cannot get the user informations
+                * We need to update its informations here (picture, name and email) */
                 TextView userName = (TextView) findViewById(R.id.userName);
                 TextView userMail = (TextView) findViewById(R.id.userMail);
                 ImageView profilePicture = (ImageView) findViewById(R.id.profilePicture);
-
             }
             else {
-                // cancelled
+                // Cancelled. Nothing to do for now
             }
+        }
+    }
+
+    private void destroyFragments() {
+        for (fragmentKey k : fragmentKey.values()) {
+            if (fragments.containsKey(k))
+                fragments.remove(k);
         }
     }
 }
