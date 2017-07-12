@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity
         // Set up the navigationView
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        navigationView.getMenu().getItem(1).setChecked(true);
 
         // Create the 1st fragment and display it
         getSupportFragmentManager().beginTransaction().add(R.id.frame, new CategoriesFragment(), "CATEGORIES").commit();
@@ -160,6 +161,13 @@ public class MainActivity extends AppCompatActivity
                 TextView userName = (TextView) findViewById(R.id.userName);
                 TextView userMail = (TextView) findViewById(R.id.userMail);
                 ImageView profilePicture = (ImageView) findViewById(R.id.profilePicture);
+
+                NavigationView nv = (NavigationView) findViewById(R.id.nav_view);
+                nv.getMenu().getItem(0).setChecked(true);
+
+                // Finally, close the drawer
+                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+                drawer.closeDrawer(GravityCompat.START);
             }
             else {
                 // Cancelled. Nothing to do for now
