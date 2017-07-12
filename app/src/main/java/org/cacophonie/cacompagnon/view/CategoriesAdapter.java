@@ -15,14 +15,14 @@ import java.util.List;
  * Created by sidou on 11/07/17.
  */
 
-public class CategoryViewAdapter extends BaseAdapter {
+public class CategoriesAdapter extends BaseAdapter {
     private Context mContext;
     private List<VanillaAPI.Category> mCategories = null;
 
     public static final int HEADING = 0;
     public static final int DISCUSSIONS = 1;
 
-    public CategoryViewAdapter(Context context) {
+    public CategoriesAdapter(Context context) {
         mContext = context;
     }
 

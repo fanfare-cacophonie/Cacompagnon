@@ -1,33 +1,26 @@
 package org.cacophonie.cacompagnon.fragment;
 
 
-import android.content.Context;
-import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.LinearLayout;
-import android.widget.ListAdapter;
+import android.widget.ListView;
 
 import org.cacophonie.cacompagnon.R;
 import org.cacophonie.cacompagnon.activity.MainActivity;
 import org.cacophonie.cacompagnon.utils.VanillaAPI;
-import org.cacophonie.cacompagnon.view.CategoryView;
-import org.cacophonie.cacompagnon.view.CategoryViewAdapter;
+import org.cacophonie.cacompagnon.view.CategoriesAdapter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class CategoriesFragment extends ListFragment implements VanillaAPI.Callback {
-    private CategoryViewAdapter adapter;
+    private CategoriesAdapter adapter;
 
     public CategoriesFragment() {
         // Required empty public constructor
@@ -38,7 +31,7 @@ public class CategoriesFragment extends ListFragment implements VanillaAPI.Callb
         super.onCreate(savedInstanceState);
 
         // Create a new adapter
-        adapter = new CategoryViewAdapter(getContext());
+        adapter = new CategoriesAdapter(getContext());
         // Use it
         setListAdapter(adapter);
 
