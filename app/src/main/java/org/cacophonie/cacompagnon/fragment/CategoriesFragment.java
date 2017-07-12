@@ -34,23 +34,22 @@ public class CategoriesFragment extends ListFragment implements VanillaAPI.Callb
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        getActivity().setTitle(R.string.nav_categories);
-        return inflater.inflate(R.layout.fragment_categories, container, false);
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstance) {
-        super.onActivityCreated(savedInstance);
-
-        MainActivity activity = (MainActivity) getActivity();
-        activity.getAPI().getCategories(this);
+    public void onCreate (Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         // Create a new adapter
         adapter = new CategoryViewAdapter(getContext());
-
         // Use it
         setListAdapter(adapter);
+
+        MainActivity activity = (MainActivity) getActivity();
+        activity.getAPI().getCategories(this);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        getActivity().setTitle(R.string.nav_categories);
+        return inflater.inflate(R.layout.fragment_categories, container, false);
     }
 
     // This function is called when the category list is available

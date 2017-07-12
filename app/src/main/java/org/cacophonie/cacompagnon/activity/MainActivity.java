@@ -6,6 +6,8 @@ import android.os.StrictMode;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -30,13 +32,6 @@ import java.util.EnumMap;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private enum fragmentKey {
-        HOME,
-        CATEGORIES,
-        MPLIST,
-        PRESENCES
-    }
-    private EnumMap<fragmentKey, Fragment> fragments; // List of the fragments
     private VanillaAPI api;
 
     @Override
@@ -50,9 +45,6 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Initialize the fragment list
-        fragments = new EnumMap<>(fragmentKey.class);
-
         // Set up the drawer
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -64,8 +56,7 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         // Create the 1st fragment and display it
-        fragments.put(fragmentKey.CATEGORIES, new CategoriesFragment());
-        getSupportFragmentManager().beginTransaction().replace(R.id.frame, fragments.get(fragmentKey.CATEGORIES)).commit();
+        getSupportFragmentManager().beginTransaction().add(R.id.frame, new CategoriesFragment(), "CATEGORIES").commit();
 
         api = new VanillaAPI("https://smaiz.fr/vanilla/api");
     }
@@ -110,38 +101,40 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         Fragment currentFragment;
+        FragmentManager fragmentManager = getSupportFragmentManager();
         // Find the selected menu item
         switch (item.getItemId()) {
             default:
             case R.id.nav_home:
                 // If no fragment exists, create one
-                if (!fragments.containsKey(fragmentKey.HOME))
-                    fragments.put(fragmentKey.HOME, new HomeFragment());
-                currentFragment = fragments.get(fragmentKey.HOME);
+                currentFragment = fragmentManager.findFragmentByTag("HOME");
+                if (currentFragment == null)
+                    currentFragment = new HomeFragment();
+                fragmentManager.beginTransaction().replace(R.id.frame, currentFragment, "HOME").addToBackStack(null).commit();
                 break;
             case R.id.nav_categories:
-                if (!fragments.containsKey(fragmentKey.CATEGORIES))
-                    fragments.put(fragmentKey.CATEGORIES, new CategoriesFragment());
-                currentFragment = fragments.get(fragmentKey.CATEGORIES);
+                currentFragment = fragmentManager.findFragmentByTag("CATEGORIES");
+                if (currentFragment == null)
+                    currentFragment = new CategoriesFragment();
+                fragmentManager.beginTransaction().replace(R.id.frame, currentFragment, "CATEGORIES").addToBackStack(null).commit();
                 break;
             case R.id.nav_mp:
-                if (!fragments.containsKey(fragmentKey.MPLIST))
-                    fragments.put(fragmentKey.MPLIST, new MPListFragment());
-                currentFragment = fragments.get(fragmentKey.MPLIST);
+                currentFragment = fragmentManager.findFragmentByTag("MP");
+                if (currentFragment == null)
+                    currentFragment = new MPListFragment();
+                fragmentManager.beginTransaction().replace(R.id.frame, currentFragment, "MP").addToBackStack(null).commit();
                 break;
             case R.id.nav_presence:
-                if (!fragments.containsKey(fragmentKey.PRESENCES))
-                    fragments.put(fragmentKey.PRESENCES, new PresenceFragment());
-                currentFragment = fragments.get(fragmentKey.PRESENCES);
+                currentFragment = fragmentManager.findFragmentByTag("PRESENCES");
+                if (currentFragment == null)
+                    currentFragment = new PresenceFragment();
+                fragmentManager.beginTransaction().replace(R.id.frame, currentFragment, "PRESENCES").addToBackStack(null).commit();
                 break;
             case R.id.nav_login:
                 Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
                 startActivityForResult(intent, LoginActivity.LOGIN_INTENT_CODE);
                 return true;
         }
-
-        // Replace the actual fragment by the new one
-        getSupportFragmentManager().beginTransaction().replace(R.id.frame, currentFragment).commit();
 
         // Finally, close the drawer
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -159,12 +152,11 @@ public class MainActivity extends AppCompatActivity
                 // Destroy the fragments to force the renewal of their data
                 destroyFragments();
                 // Create a new HomeFragment and display it
-                fragments.put(fragmentKey.HOME, new HomeFragment());
-                getSupportFragmentManager().beginTransaction().replace(R.id.frame, fragments.get(fragmentKey.HOME)).commitAllowingStateLoss();
+                getSupportFragmentManager().beginTransaction().add(R.id.frame, new HomeFragment(), "HOME").commitAllowingStateLoss();
 
                 /* TODO: Drawer update
-                * For now, ther is a bug ine the API, I cannot get the user informations
-                * We need to update its informations here (picture, name and email) */
+                * For now, there is a bug ine the API, I cannot get the user information
+                * We need to update its information here (picture, name and email) */
                 TextView userName = (TextView) findViewById(R.id.userName);
                 TextView userMail = (TextView) findViewById(R.id.userMail);
                 ImageView profilePicture = (ImageView) findViewById(R.id.profilePicture);
@@ -176,9 +168,19 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void destroyFragments() {
-        for (fragmentKey k : fragmentKey.values()) {
-            if (fragments.containsKey(k))
-                fragments.remove(k);
-        }
+        FragmentManager fm = getSupportFragmentManager();
+        Fragment f;
+        f = fm.findFragmentByTag("HOME");
+        if (f != null)
+            fm.beginTransaction().remove(f).commitNowAllowingStateLoss();
+        f = fm.findFragmentByTag("CATEGORIES");
+        if (f != null)
+            fm.beginTransaction().remove(f).commitNowAllowingStateLoss();
+        f = fm.findFragmentByTag("MP");
+        if (f != null)
+            fm.beginTransaction().remove(f).commitNowAllowingStateLoss();
+        f = fm.findFragmentByTag("PRESENCES");
+        if (f != null)
+            fm.beginTransaction().remove(f).commitNowAllowingStateLoss();
     }
 }
