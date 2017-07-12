@@ -109,6 +109,7 @@ public class VanillaAPI {
                 }
                 in = conn.getInputStream();
                 if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                    Log.d("HTTP", "The server returned an error");
                     return null;
                 }
             }
@@ -121,10 +122,10 @@ public class VanillaAPI {
                     return parseCategories(new InputStreamReader(in));
                 case CATEGORY:
                     return parseCategoryFull(new InputStreamReader(in));
+                default:
                 case DEBUG:
                     return new java.util.Scanner(in).useDelimiter("\\A").next();
             }
-            return null;
         }
     }
 
@@ -162,7 +163,7 @@ public class VanillaAPI {
         public int CountAllDiscussions;
         public int CountAllComments;
         public String Url;
-        public List ChildIDs;
+        public List<Integer> ChildIDs = new ArrayList<>();;
         public String PhotoUrl;
         public boolean NoComment; // for Discussion but not Headings
         public String LastTitle;
@@ -613,13 +614,13 @@ public class VanillaAPI {
 
     public class CategoryFull {
         public Category Category;
-        public List<Integer> Categories;
+        public List<Category> Categories = new ArrayList<>();
         public int CategoryID;
         public String Sort;
-        public List<Object> Filter;
+        public List<Object> Filter = new ArrayList<>();
         public int CountDiscussions;
-        public List<Object> AnnounceData;
-        public List<Discussion> Discussions;
+        public List<Discussion> AnnounceData = new ArrayList<>();
+        public List<Discussion> Discussions = new ArrayList<>();
 
         public CategoryFull(JsonReader reader) {
             try {
@@ -630,7 +631,19 @@ public class VanillaAPI {
                             Category = new Category(reader);
                             break;
                         case "Categories":
-                            Categories = readListInt(reader);
+                            // When there's no child categories the API return an empty ARRAY
+                            if (reader.peek() == JsonToken.BEGIN_ARRAY) {
+                                reader.beginArray();
+                                reader.endArray();
+                                break;
+                            }
+
+                            reader.beginObject();
+                            while (reader.hasNext()) {
+                                reader.skipValue(); // Here name = ID
+                                Categories.add(new Category(reader));
+                            }
+                            reader.endObject();
                             break;
                         case "CategoryID":
                             CategoryID = reader.nextInt();
@@ -645,7 +658,10 @@ public class VanillaAPI {
                             CountDiscussions = reader.nextInt();
                             break;
                         case "AnnounceData":
-                            AnnounceData = readListInt(reader);
+                            reader.beginArray();
+                            while (reader.hasNext())
+                                AnnounceData.add(new Discussion(reader));
+                            reader.endArray();
                             break;
                         case "Discussions":
                             Discussions = new ArrayList<>();
