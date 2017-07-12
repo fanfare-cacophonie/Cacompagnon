@@ -3,6 +3,7 @@ package org.cacophonie.cacompagnon.fragment;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,6 +38,17 @@ public class CategoriesFragment extends ListFragment implements VanillaAPI.Callb
 
         MainActivity activity = (MainActivity) getActivity();
         activity.getAPI().getCategories(this);
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        VanillaAPI.Category cat = (VanillaAPI.Category) getListView().getItemAtPosition(position);
+        Bundle args = new Bundle();
+        args.putInt("CategoryID", cat.CategoryID);
+        CategoryFragment fragment = new CategoryFragment();
+        fragment.setArguments(args);
+        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.frame, fragment).addToBackStack(null).commit();
     }
 
     @Override

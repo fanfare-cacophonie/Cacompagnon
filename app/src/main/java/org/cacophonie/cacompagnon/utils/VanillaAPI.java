@@ -3,6 +3,7 @@ package org.cacophonie.cacompagnon.utils;
 import android.os.AsyncTask;
 import android.util.JsonReader;
 import android.util.JsonToken;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +19,10 @@ public class VanillaAPI {
     private String sessionCookie = "";
 
     private enum types {
-        CATEGORIES
+        CATEGORIES,
+        CATEGORY,
+
+        DEBUG
     }
 
     public interface Callback {
@@ -61,6 +65,19 @@ public class VanillaAPI {
         return ret;
     }
 
+    public void getCategory(int id, Callback cb) {
+        AsyncRequest req = new AsyncRequest();
+        req.execute(remoteURL + "categories/" + id, types.CATEGORY, cb);
+    }
+
+    private CategoryFull parseCategoryFull(InputStreamReader isr) {
+        JsonReader jsonReader = new JsonReader(isr);
+        CategoryFull ret = null;
+
+        ret = new CategoryFull(jsonReader);
+        return ret;
+    }
+
     private class AsyncRequest extends AsyncTask<Object, Void, Object> {
         private types mType;
         private Callback mCb;
@@ -70,6 +87,11 @@ public class VanillaAPI {
                 case CATEGORIES:
                     mCb.onFinished(ret);
                     break;
+                case CATEGORY:
+                    mCb.onFinished(ret);
+                    break;
+                case DEBUG:
+                    Log.d("JSON", (String) ret);
             }
         }
 
@@ -97,6 +119,10 @@ public class VanillaAPI {
             switch (mType) {
                 case CATEGORIES:
                     return parseCategories(new InputStreamReader(in));
+                case CATEGORY:
+                    return parseCategoryFull(new InputStreamReader(in));
+                case DEBUG:
+                    return new java.util.Scanner(in).useDelimiter("\\A").next();
             }
             return null;
         }
@@ -238,7 +264,7 @@ public class VanillaAPI {
                                 reader.nextNull();
                             }
                             else
-                                AllowDiscussions = StoB(reader.nextString());
+                                AllowDiscussions = ItoB(reader.nextInt());
                             break;
                         case "Archived":
                             if (reader.peek() == JsonToken.NULL) {
@@ -246,7 +272,7 @@ public class VanillaAPI {
                                 reader.nextNull();
                             }
                             else
-                                Archived = StoB(reader.nextString());
+                                Archived = ItoB(reader.nextInt());
                             break;
                         case "Name":
                             if (reader.peek() == JsonToken.NULL) {
@@ -318,7 +344,7 @@ public class VanillaAPI {
                                 reader.nextNull();
                             }
                             else
-                                HideAllDiscussions = StoB(reader.nextString());
+                                HideAllDiscussions = ItoB(reader.nextInt());
                             break;
                         case "DisplayAs":
                             if (reader.peek() == JsonToken.NULL) {
@@ -406,7 +432,7 @@ public class VanillaAPI {
                                 reader.nextNull();
                             }
                             else
-                                AllowFileUploads = StoB(reader.nextString());
+                                AllowFileUploads = ItoB(reader.nextInt());
                             break;
                         case "CountAllDiscussions":
                             if (reader.peek() == JsonToken.NULL) {
@@ -434,7 +460,7 @@ public class VanillaAPI {
                             break;
                         case "ChildIDs":
                             if (reader.peek() != JsonToken.NULL)
-                                ChildIDs = readList(reader);
+                                ChildIDs = readListInt(reader);
                             break;
                         case "PhotoUrl":
                             if (reader.peek() == JsonToken.NULL) {
@@ -583,24 +609,532 @@ public class VanillaAPI {
                 e.printStackTrace();
             }
         }
+    }
 
-        private List readList(JsonReader reader) {
-            List<Integer> tab = new ArrayList<>();
+    public class CategoryFull {
+        public Category Category;
+        public List<Integer> Categories;
+        public int CategoryID;
+        public String Sort;
+        public List<Object> Filter;
+        public int CountDiscussions;
+        public List<Object> AnnounceData;
+        public List<Discussion> Discussions;
+
+        public CategoryFull(JsonReader reader) {
             try {
-                reader.beginArray();
+                reader.beginObject();
                 while (reader.hasNext()) {
-                    tab.add(reader.nextInt());
+                    switch (reader.nextName()) {
+                        case "Category":
+                            Category = new Category(reader);
+                            break;
+                        case "Categories":
+                            Categories = readListInt(reader);
+                            break;
+                        case "CategoryID":
+                            CategoryID = reader.nextInt();
+                            break;
+                        case "Sort":
+                            Sort = reader.nextString();
+                            break;
+                        case "Filter":
+                            Filter = readListInt(reader);
+                            break;
+                        case "CountDiscussions":
+                            CountDiscussions = reader.nextInt();
+                            break;
+                        case "AnnounceData":
+                            AnnounceData = readListInt(reader);
+                            break;
+                        case "Discussions":
+                            Discussions = new ArrayList<>();
+                            reader.beginArray();
+                            while (reader.hasNext()) {
+                                Discussions.add(new Discussion(reader));
+                            }
+                            reader.endArray();
+                            break;
+                        default:
+                            reader.skipValue();
+                            break;
+                    }
                 }
-                reader.endArray();
             }
             catch (Exception e) {
                 e.printStackTrace();
             }
-            return tab;
         }
+    }
 
-        private boolean StoB(String s) {
-            return s.equals("1");
+    public class Discussion {
+        public int DiscussionID;
+        public String Type;
+        public int ForeignID;
+        public int CategoryID;
+        public int InsertUserID;
+        public int UpdateUserID;
+        public int FirstCommentID;
+        public int LastCommentID;
+        public String Name;
+        public String Body;
+        public String Format;
+        public String Tags;
+        public int CountComments;
+        public int CountBookmarks;
+        public int CountViews;
+        public boolean Closed;
+        public boolean Announce;
+        public boolean Sink;
+        public String DateInserted;
+        public String DateUpdated;
+        public String InsertIPAddress;
+        public String UpdateIPAddress;
+        public String DateLastComment;
+        public int LastCommentUserID;
+        public int Score;
+        public int RegardingID;
+        public int WatchUserID;
+        public String DateLastViewed;
+        public boolean Dismissed;
+        public boolean Bookmarked;
+        public int CountCommentWatch;
+        public boolean Participated;
+        public String Url;
+        public String Category;
+        public String CategoryUrlCode;
+        public int PermissionCategoryID;
+        public int FirstUserID;
+        public String FirstDate;
+        public int LastUserID;
+        public String LastDate;
+        public boolean CountUnreadComments;
+        public boolean Read;
+        public String FirstName;
+        public String FirstEmail;
+        public String FirstPhoto;
+        public String LastName;
+        public String LastEmail;
+        public String LastPhoto;
+
+        public Discussion(JsonReader reader) {
+            try {
+                reader.beginObject();
+                while (reader.hasNext()) {
+                    switch (reader.nextName()) {
+                        case "DiscussionID":
+                            if (reader.peek() == JsonToken.NULL) {
+                                DiscussionID = 0;
+                                reader.nextNull();
+                            }
+                            else
+                                DiscussionID = reader.nextInt();
+                            break;
+                        case "Type":
+                            if (reader.peek() == JsonToken.NULL) {
+                                Type = "";
+                                reader.nextNull();
+                            }
+                            else
+                                Type = reader.nextString();
+                            break;
+                        case "ForeignID":
+                            if (reader.peek() == JsonToken.NULL) {
+                                ForeignID = 0;
+                                reader.nextNull();
+                            }
+                            else
+                                ForeignID = reader.nextInt();
+                            break;
+                        case "CategoryID":
+                            if (reader.peek() == JsonToken.NULL) {
+                                CategoryID = 0;
+                                reader.nextNull();
+                            }
+                            else
+                                CategoryID = reader.nextInt();
+                            break;
+                        case "InsertUserID":
+                            if (reader.peek() == JsonToken.NULL) {
+                                InsertUserID = 0;
+                                reader.nextNull();
+                            }
+                            else
+                                InsertUserID = reader.nextInt();
+                            break;
+                        case "UpdateUserID":
+                            if (reader.peek() == JsonToken.NULL) {
+                                UpdateUserID = 0;
+                                reader.nextNull();
+                            }
+                            else
+                                UpdateUserID = reader.nextInt();
+                            break;
+                        case "FirstCommentID":
+                            if (reader.peek() == JsonToken.NULL) {
+                                FirstCommentID = 0;
+                                reader.nextNull();
+                            }
+                            else
+                                FirstCommentID = reader.nextInt();
+                            break;
+                        case "LastCommentID":
+                            if (reader.peek() == JsonToken.NULL) {
+                                LastCommentID = 0;
+                                reader.nextNull();
+                            }
+                            else
+                                LastCommentID = reader.nextInt();
+                            break;
+                        case "Name":
+                            if (reader.peek() == JsonToken.NULL) {
+                                Name = "";
+                                reader.nextNull();
+                            }
+                            else
+                                Name = reader.nextString();
+                            break;
+                        case "Body":
+                            if (reader.peek() == JsonToken.NULL) {
+                                Body = "";
+                                reader.nextNull();
+                            }
+                            else
+                                Body = reader.nextString();
+                            break;
+                        case "Format":
+                            if (reader.peek() == JsonToken.NULL) {
+                                Format = "";
+                                reader.nextNull();
+                            }
+                            else
+                                Format = reader.nextString();
+                            break;
+                        case "Tags":
+                            if (reader.peek() == JsonToken.NULL) {
+                                Tags = "";
+                                reader.nextNull();
+                            }
+                            else
+                                Tags = reader.nextString();
+                            break;
+                        case "CountComments":
+                            if (reader.peek() == JsonToken.NULL) {
+                                CountComments = 0;
+                                reader.nextNull();
+                            }
+                            else
+                                CountComments = reader.nextInt();
+                            break;
+                        case "CountBookmarks":
+                            if (reader.peek() == JsonToken.NULL) {
+                                CountBookmarks = 0;
+                                reader.nextNull();
+                            }
+                            else
+                                CountBookmarks = reader.nextInt();
+                            break;
+                        case "CountViews":
+                            if (reader.peek() == JsonToken.NULL) {
+                                CountViews = 0;
+                                reader.nextNull();
+                            }
+                            else
+                                CountViews = reader.nextInt();
+                            break;
+                        case "Closed":
+                            if (reader.peek() == JsonToken.NULL) {
+                                Closed = false;
+                                reader.nextNull();
+                            }
+                            else
+                                Closed = ItoB(reader.nextInt());
+                            break;
+                        case "Announce":
+                            if (reader.peek() == JsonToken.NULL) {
+                                Announce = false;
+                                reader.nextNull();
+                            }
+                            else
+                                Announce = ItoB(reader.nextInt());
+                            break;
+                        case "Sink":
+                            if (reader.peek() == JsonToken.NULL) {
+                                Sink = false;
+                                reader.nextNull();
+                            }
+                            else
+                                Sink = ItoB(reader.nextInt());
+                            break;
+                        case "DateInserted":
+                            if (reader.peek() == JsonToken.NULL) {
+                                DateInserted = "";
+                                reader.nextNull();
+                            }
+                            else
+                                DateInserted = reader.nextString();
+                            break;
+                        case "DateUpdated":
+                            if (reader.peek() == JsonToken.NULL) {
+                                DateUpdated = "";
+                                reader.nextNull();
+                            }
+                            else
+                                DateUpdated = reader.nextString();
+                            break;
+                        case "InsertIPAddress":
+                            if (reader.peek() == JsonToken.NULL) {
+                                InsertIPAddress = "";
+                                reader.nextNull();
+                            }
+                            else
+                                InsertIPAddress = reader.nextString();
+                            break;
+                        case "UpdateIPAddress":
+                            if (reader.peek() == JsonToken.NULL) {
+                                UpdateIPAddress = "";
+                                reader.nextNull();
+                            }
+                            else
+                                UpdateIPAddress = reader.nextString();
+                            break;
+                        case "DateLastComment":
+                            if (reader.peek() == JsonToken.NULL) {
+                                DateLastComment = "";
+                                reader.nextNull();
+                            }
+                            else
+                                DateLastComment = reader.nextString();
+                            break;
+                        case "LastCommentUserID":
+                            if (reader.peek() == JsonToken.NULL) {
+                                LastCommentUserID = 0;
+                                reader.nextNull();
+                            }
+                            else
+                                LastCommentUserID = reader.nextInt();
+                            break;
+                        case "Score":
+                            if (reader.peek() == JsonToken.NULL) {
+                                Score = 0;
+                                reader.nextNull();
+                            }
+                            else
+                                Score = reader.nextInt();
+                            break;
+                        case "RegardingID":
+                            if (reader.peek() == JsonToken.NULL) {
+                                RegardingID = 0;
+                                reader.nextNull();
+                            }
+                            else
+                                RegardingID = reader.nextInt();
+                            break;
+                        case "WatchUserID":
+                            if (reader.peek() == JsonToken.NULL) {
+                                WatchUserID = 0;
+                                reader.nextNull();
+                            }
+                            else
+                                WatchUserID = reader.nextInt();
+                            break;
+                        case "DateLastViewed":
+                            if (reader.peek() == JsonToken.NULL) {
+                                DateLastViewed = "";
+                                reader.nextNull();
+                            }
+                            else
+                                DateLastViewed = reader.nextString();
+                            break;
+                        case "Dismissed":
+                            if (reader.peek() == JsonToken.NULL) {
+                                Dismissed = false;
+                                reader.nextNull();
+                            }
+                            else
+                                Dismissed = ItoB(reader.nextInt());
+                            break;
+                        case "Bookmarked":
+                            if (reader.peek() == JsonToken.NULL) {
+                                Bookmarked = false;
+                                reader.nextNull();
+                            }
+                            else
+                                Bookmarked = ItoB(reader.nextInt());
+                            break;
+                        case "CountCommentWatch":
+                            if (reader.peek() == JsonToken.NULL) {
+                                CountCommentWatch = 0;
+                                reader.nextNull();
+                            }
+                            else
+                                CountCommentWatch = reader.nextInt();
+                            break;
+                        case "Participated":
+                            if (reader.peek() == JsonToken.NULL) {
+                                Participated = false;
+                                reader.nextNull();
+                            }
+                            else
+                                Participated = ItoB(reader.nextInt());
+                            break;
+                        case "Url":
+                            if (reader.peek() == JsonToken.NULL) {
+                                Url = "";
+                                reader.nextNull();
+                            }
+                            else
+                                Url = reader.nextString();
+                            break;
+                        case "Category":
+                            if (reader.peek() == JsonToken.NULL) {
+                                Category = "";
+                                reader.nextNull();
+                            }
+                            else
+                                Category = reader.nextString();
+                            break;
+                        case "CategoryUrlCode":
+                            if (reader.peek() == JsonToken.NULL) {
+                                CategoryUrlCode = "";
+                                reader.nextNull();
+                            }
+                            else
+                                CategoryUrlCode = reader.nextString();
+                            break;
+                        case "PermissionCategoryID":
+                            if (reader.peek() == JsonToken.NULL) {
+                                PermissionCategoryID = 0;
+                                reader.nextNull();
+                            }
+                            else
+                                PermissionCategoryID = reader.nextInt();
+                            break;
+                        case "FirstUserID":
+                            if (reader.peek() == JsonToken.NULL) {
+                                FirstUserID = 0;
+                                reader.nextNull();
+                            }
+                            else
+                                FirstUserID = reader.nextInt();
+                            break;
+                        case "FirstDate":
+                            if (reader.peek() == JsonToken.NULL) {
+                                FirstDate = "";
+                                reader.nextNull();
+                            }
+                            else
+                                FirstDate = reader.nextString();
+                            break;
+                        case "LastUserID":
+                            if (reader.peek() == JsonToken.NULL) {
+                                LastUserID = 0;
+                                reader.nextNull();
+                            }
+                            else
+                                LastUserID = reader.nextInt();
+                            break;
+                        case "LastDate":
+                            if (reader.peek() == JsonToken.NULL) {
+                                LastDate = "";
+                                reader.nextNull();
+                            }
+                            else
+                                LastDate = reader.nextString();
+                            break;
+                        case "CountUnreadComments":
+                            if (reader.peek() == JsonToken.NULL) {
+                                CountUnreadComments = false;
+                                reader.nextNull();
+                            }
+                            // Sometimes, the API returns false, sometimes 0 ...
+                            else if (reader.peek() == JsonToken.NUMBER)
+                                CountUnreadComments = ItoB(reader.nextInt());
+                            else
+                                CountUnreadComments = reader.nextBoolean();
+                            break;
+                        case "Read":
+                            if (reader.peek() == JsonToken.NULL) {
+                                Read = false;
+                                reader.nextNull();
+                            }
+                            else
+                                Read = reader.nextBoolean();
+                            break;
+                        case "FirstName":
+                            if (reader.peek() == JsonToken.NULL) {
+                                FirstName = "";
+                                reader.nextNull();
+                            }
+                            else
+                                FirstName = reader.nextString();
+                            break;
+                        case "FirstEmail":
+                            if (reader.peek() == JsonToken.NULL) {
+                                FirstEmail = "";
+                                reader.nextNull();
+                            }
+                            else
+                                FirstEmail = reader.nextString();
+                            break;
+                        case "FirstPhoto":
+                            if (reader.peek() == JsonToken.NULL) {
+                                FirstPhoto = "";
+                                reader.nextNull();
+                            }
+                            else
+                                FirstPhoto = reader.nextString();
+                            break;
+                        case "LastName":
+                            if (reader.peek() == JsonToken.NULL) {
+                                LastName = "";
+                                reader.nextNull();
+                            }
+                            else
+                                LastName = reader.nextString();
+                            break;
+                        case "LastEmail":
+                            if (reader.peek() == JsonToken.NULL) {
+                                LastEmail = "";
+                                reader.nextNull();
+                            }
+                            else
+                                LastEmail = reader.nextString();
+                            break;
+                        case "LastPhoto":
+                            if (reader.peek() == JsonToken.NULL) {
+                                LastPhoto = "";
+                                reader.nextNull();
+                            }
+                            else
+                                LastPhoto = reader.nextString();
+                            break;
+                    }
+                }
+                reader.endObject();
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
         }
+    }
+
+    private boolean ItoB(int i) {
+        return i == 1;
+    }
+
+    private List readListInt(JsonReader reader) {
+        List<Integer> tab = new ArrayList<>();
+        try {
+            reader.beginArray();
+            while (reader.hasNext()) {
+                tab.add(reader.nextInt());
+            }
+            reader.endArray();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return tab;
     }
 }
