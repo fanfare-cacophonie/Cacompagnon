@@ -3,10 +3,12 @@ package org.cacophonie.cacompagnon.fragment;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
 import org.cacophonie.cacompagnon.R;
 import org.cacophonie.cacompagnon.activity.MainActivity;
@@ -35,6 +37,19 @@ public class CategoryFragment extends ListFragment implements VanillaAPI.Callbac
 
         MainActivity activity = (MainActivity) getActivity();
         activity.getAPI().getCategory(getArguments().getInt("CategoryID"), this);
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        if (adapter.getItemViewType(position) == CategoryFullAdapter.NESTED_CATEGORY)
+            return;
+        VanillaAPI.Discussion disc = (VanillaAPI.Discussion) getListView().getItemAtPosition(position);
+        Bundle args = new Bundle();
+        args.putInt("DiscussionID", disc.DiscussionID);
+        ThreadFragment fragment = new ThreadFragment();
+        fragment.setArguments(args);
+        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.frame, fragment).addToBackStack(null).commit();
     }
 
     @Override

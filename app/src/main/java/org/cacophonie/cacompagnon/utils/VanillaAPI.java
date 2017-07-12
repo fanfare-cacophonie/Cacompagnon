@@ -1,5 +1,6 @@
 package org.cacophonie.cacompagnon.utils;
 
+import android.media.audiofx.AudioEffect;
 import android.os.AsyncTask;
 import android.util.JsonReader;
 import android.util.JsonToken;
@@ -21,6 +22,7 @@ public class VanillaAPI {
     private enum types {
         CATEGORIES,
         CATEGORY,
+        DISCUSSION,
 
         DEBUG
     }
@@ -72,10 +74,17 @@ public class VanillaAPI {
 
     private CategoryFull parseCategoryFull(InputStreamReader isr) {
         JsonReader jsonReader = new JsonReader(isr);
-        CategoryFull ret = null;
+        return new CategoryFull(jsonReader);
+    }
 
-        ret = new CategoryFull(jsonReader);
-        return ret;
+    public void getDiscussion(int id, Callback cb) {
+        AsyncRequest req = new AsyncRequest();
+        req.execute(remoteURL + "discussions/" + id, types.DISCUSSION, cb);
+    }
+
+    private DiscussionFull parseDiscussionFull(InputStreamReader isr) {
+        JsonReader reader = new JsonReader(isr);
+        return new DiscussionFull(reader) ;
     }
 
     private class AsyncRequest extends AsyncTask<Object, Void, Object> {
@@ -83,20 +92,15 @@ public class VanillaAPI {
         private Callback mCb;
 
         protected void onPostExecute(Object ret) {
-            switch (mType) {
-                case CATEGORIES:
-                    mCb.onFinished(ret);
-                    break;
-                case CATEGORY:
-                    mCb.onFinished(ret);
-                    break;
-                case DEBUG:
-                    Log.d("JSON", (String) ret);
+            if (mType == types.DEBUG) {
+                Log.d("JSON", (String) ret);
+                return;
             }
+            mCb.onFinished(ret);
         }
 
         protected Object doInBackground(Object... params) {
-            InputStream in;
+            InputStreamReader in;
             try {
                 URL url = new URL((String) params[0]);
                 mType = (types) params[1];
@@ -107,7 +111,7 @@ public class VanillaAPI {
                 if (!sessionCookie.isEmpty()) {
                     conn.setRequestProperty("Cookie", sessionCookie);
                 }
-                in = conn.getInputStream();
+                in = new InputStreamReader(conn.getInputStream());
                 if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
                     Log.d("HTTP", "The server returned an error");
                     return null;
@@ -119,9 +123,11 @@ public class VanillaAPI {
             }
             switch (mType) {
                 case CATEGORIES:
-                    return parseCategories(new InputStreamReader(in));
+                    return parseCategories(in);
                 case CATEGORY:
-                    return parseCategoryFull(new InputStreamReader(in));
+                    return parseCategoryFull(in);
+                case DISCUSSION:
+                    return parseDiscussionFull(in);
                 default:
                 case DEBUG:
                     return new java.util.Scanner(in).useDelimiter("\\A").next();
@@ -163,7 +169,7 @@ public class VanillaAPI {
         public int CountAllDiscussions;
         public int CountAllComments;
         public String Url;
-        public List<Integer> ChildIDs = new ArrayList<>();;
+        public List<Integer> ChildIDs = new ArrayList<>();
         public String PhotoUrl;
         public boolean NoComment; // for Discussion but not Headings
         public String LastTitle;
@@ -600,6 +606,7 @@ public class VanillaAPI {
                                 LastPhoto = reader.nextString();
                             break;
                         default:
+                            Log.d("JSON", "Missed variable in Category: " + reader.peek());
                             reader.skipValue();
                             break;
                     }
@@ -617,7 +624,7 @@ public class VanillaAPI {
         public List<Category> Categories = new ArrayList<>();
         public int CategoryID;
         public String Sort;
-        public List<Object> Filter = new ArrayList<>();
+        public List<Object> Filters = new ArrayList<>();
         public int CountDiscussions;
         public List<Discussion> AnnounceData = new ArrayList<>();
         public List<Discussion> Discussions = new ArrayList<>();
@@ -651,8 +658,8 @@ public class VanillaAPI {
                         case "Sort":
                             Sort = reader.nextString();
                             break;
-                        case "Filter":
-                            Filter = readListInt(reader);
+                        case "Filters":
+                            Filters = readListInt(reader);
                             break;
                         case "CountDiscussions":
                             CountDiscussions = reader.nextInt();
@@ -732,6 +739,9 @@ public class VanillaAPI {
         public String LastName;
         public String LastEmail;
         public String LastPhoto;
+        public String InsertName;
+        public String InsertEmail;
+        public String InsertPhoto;
 
         public Discussion(JsonReader reader) {
             try {
@@ -1124,6 +1134,276 @@ public class VanillaAPI {
                             }
                             else
                                 LastPhoto = reader.nextString();
+                            break;
+                        case "InsertName":
+                            if (reader.peek() == JsonToken.NULL) {
+                                InsertName = "";
+                                reader.nextNull();
+                            }
+                            else
+                                InsertName = reader.nextString();
+                            break;
+                        case "InsertEmail":
+                            if (reader.peek() == JsonToken.NULL) {
+                                InsertEmail = "";
+                                reader.nextNull();
+                            }
+                            else
+                                InsertEmail = reader.nextString();
+                            break;
+                        case "InsertPhoto":
+                            if (reader.peek() == JsonToken.NULL) {
+                                InsertPhoto = "";
+                                reader.nextNull();
+                            }
+                            else
+                                InsertPhoto = reader.nextString();
+                            break;
+                        default:
+                            reader.skipValue();
+                            break;
+                    }
+                }
+                reader.endObject();
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public class DiscussionFull {
+        public Discussion Discussion;
+        public int CategoryID;
+        public Category Category;
+        public List<Comment> Comments = new ArrayList<>();
+        public int Page;
+
+        public DiscussionFull(JsonReader reader) {
+            try {
+                reader.beginObject();
+                while (reader.hasNext()) {
+                    switch (reader.nextName()) {
+                        case "Discussion":
+                            Discussion = new Discussion(reader);
+                            break;
+                        case "CategoryID":
+                            CategoryID = reader.nextInt();
+                            break;
+                        case "Category":
+                            Category = new Category(reader);
+                            break;
+                        case "Comments":
+                            reader.beginArray();
+                            while (reader.hasNext())
+                                Comments.add(new Comment(reader));
+                            reader.endArray();
+                            break;
+                        case "Page":
+                            Page = reader.nextInt();
+                            break;
+                        default:
+                            reader.skipValue();
+                            break;
+                    }
+                }
+                reader.endObject();
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public class Comment {
+        public int CommentID;
+        public int DiscussionID;
+        public int InsertUserID;
+        public int UpdateUserID;
+        public int DeleteUserID;
+        public String Body;
+        public String Format;
+        public String DateInserted;
+        public String DateDeleted;
+        public String DateUpdated;
+        public String InsertIPAddress;
+        public String UpdateIPAddress;
+        public boolean Flag;
+        public int Score;
+        public String InsertName;
+        public String InsertEmail;
+        public String InsertPhoto;
+        public String UpdateName;
+        public String UpdateEmail;
+        public String UpdatePhoto;
+
+        public Comment(JsonReader reader) {
+            try {
+                reader.beginObject();
+                while (reader.hasNext()) {
+                    switch (reader.nextName()) {
+                        case "CommentID":
+                            if (reader.peek() == JsonToken.NULL) {
+                                CommentID = 0;
+                                reader.nextNull();
+                            }
+                            else
+                                CommentID = reader.nextInt();
+                            break;
+                        case "DiscussionID":
+                            if (reader.peek() == JsonToken.NULL) {
+                                DiscussionID = 0;
+                                reader.nextNull();
+                            }
+                            else
+                                DiscussionID = reader.nextInt();
+                            break;
+                        case "InsertUserID":
+                            if (reader.peek() == JsonToken.NULL) {
+                                InsertUserID = 0;
+                                reader.nextNull();
+                            }
+                            else
+                                InsertUserID = reader.nextInt();
+                            break;
+                        case "UpdateUserID":
+                            if (reader.peek() == JsonToken.NULL) {
+                                UpdateUserID = 0;
+                                reader.nextNull();
+                            }
+                            else
+                                UpdateUserID = reader.nextInt();
+                            break;
+                        case "DeleteUserID":
+                            if (reader.peek() == JsonToken.NULL) {
+                                DeleteUserID = 0;
+                                reader.nextNull();
+                            }
+                            else
+                                DeleteUserID = reader.nextInt();
+                            break;
+                        case "Body":
+                            if (reader.peek() == JsonToken.NULL) {
+                                Body = "";
+                                reader.nextNull();
+                            }
+                            else
+                                Body = reader.nextString();
+                            break;
+                        case "Format":
+                            if (reader.peek() == JsonToken.NULL) {
+                                Format = "";
+                                reader.nextNull();
+                            }
+                            else
+                                Format = reader.nextString();
+                            break;
+                        case "DateInserted":
+                            if (reader.peek() == JsonToken.NULL) {
+                                DateInserted = "";
+                                reader.nextNull();
+                            }
+                            else
+                                DateInserted = reader.nextString();
+                            break;
+                        case "DateDeleted":
+                            if (reader.peek() == JsonToken.NULL) {
+                                DateDeleted = "";
+                                reader.nextNull();
+                            }
+                            else
+                                DateDeleted = reader.nextString();
+                            break;
+                        case "DateUpdated":
+                            if (reader.peek() == JsonToken.NULL) {
+                                DateUpdated = "";
+                                reader.nextNull();
+                            }
+                            else
+                                DateUpdated = reader.nextString();
+                            break;
+                        case "InsertIPAddress":
+                            if (reader.peek() == JsonToken.NULL) {
+                                InsertIPAddress = "";
+                                reader.nextNull();
+                            }
+                            else
+                                InsertIPAddress = reader.nextString();
+                            break;
+                        case "UpdateIPAddress":
+                            if (reader.peek() == JsonToken.NULL) {
+                                UpdateIPAddress = "";
+                                reader.nextNull();
+                            }
+                            else
+                                UpdateIPAddress = reader.nextString();
+                            break;
+                        case "Flag":
+                            if (reader.peek() == JsonToken.NULL) {
+                                Flag = false;
+                                reader.nextNull();
+                            }
+                            else
+                                Flag = ItoB(reader.nextInt());
+                            break;
+                        case "Score":
+                            if (reader.peek() == JsonToken.NULL) {
+                                Score = 0;
+                                reader.nextNull();
+                            }
+                            else
+                                Score = reader.nextInt();
+                            break;
+                        case "InsertName":
+                            if (reader.peek() == JsonToken.NULL) {
+                                InsertName = "";
+                                reader.nextNull();
+                            }
+                            else
+                                InsertName = reader.nextString();
+                            break;
+                        case "InsertEmail":
+                            if (reader.peek() == JsonToken.NULL) {
+                                InsertEmail = "";
+                                reader.nextNull();
+                            }
+                            else
+                                InsertEmail = reader.nextString();
+                            break;
+                        case "InsertPhoto":
+                            if (reader.peek() == JsonToken.NULL) {
+                                InsertPhoto = "";
+                                reader.nextNull();
+                            }
+                            else
+                                InsertPhoto = reader.nextString();
+                            break;
+                        case "UpdateName":
+                            if (reader.peek() == JsonToken.NULL) {
+                                UpdateName = "";
+                                reader.nextNull();
+                            }
+                            else
+                                UpdateName = reader.nextString();
+                            break;
+                        case "UpdateEmail":
+                            if (reader.peek() == JsonToken.NULL) {
+                                UpdateEmail = "";
+                                reader.nextNull();
+                            }
+                            else
+                                UpdateEmail = reader.nextString();
+                            break;
+                        case "UpdatePhoto":
+                            if (reader.peek() == JsonToken.NULL) {
+                                UpdatePhoto = "";
+                                reader.nextNull();
+                            }
+                            else
+                                UpdatePhoto = reader.nextString();
+                            break;
+                        default:
+                            reader.skipValue();
                             break;
                     }
                 }
