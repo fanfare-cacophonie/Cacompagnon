@@ -41,15 +41,24 @@ public class CategoryFragment extends ListFragment implements VanillaAPI.Callbac
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        if (adapter.getItemViewType(position) == CategoryFullAdapter.NESTED_CATEGORY)
-            return;
-        VanillaAPI.Discussion disc = (VanillaAPI.Discussion) getListView().getItemAtPosition(position);
-        Bundle args = new Bundle();
-        args.putInt("DiscussionID", disc.DiscussionID);
-        ThreadFragment fragment = new ThreadFragment();
-        fragment.setArguments(args);
-        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.frame, fragment).addToBackStack(null).commit();
+        if (adapter.getItemViewType(position) == CategoryFullAdapter.NESTED_CATEGORY) {
+            VanillaAPI.Category cat = (VanillaAPI.Category) getListView().getItemAtPosition(position);
+            Bundle args = new Bundle();
+            args.putInt("CategoryID", cat.CategoryID);
+            CategoryFragment fragment = new CategoryFragment();
+            fragment.setArguments(args);
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.frame, fragment).addToBackStack(null).commit();
+        }
+        else {
+            VanillaAPI.Discussion disc = (VanillaAPI.Discussion) getListView().getItemAtPosition(position);
+            Bundle args = new Bundle();
+            args.putInt("DiscussionID", disc.DiscussionID);
+            ThreadFragment fragment = new ThreadFragment();
+            fragment.setArguments(args);
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.frame, fragment).addToBackStack(null).commit();
+        }
     }
 
     @Override
