@@ -12,12 +12,16 @@ import java.io.InputStreamReader;
 import java.io.StringBufferInputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class VanillaAPI {
     private String remoteURL;
     private String sessionCookie = "";
+    private static SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static Date defaultDate;
 
     private enum types {
         CATEGORIES,
@@ -35,6 +39,12 @@ public class VanillaAPI {
         remoteURL = remoteURL_p;
         if (!remoteURL.endsWith("/"))
             remoteURL += "/";
+        try {
+            defaultDate = df.parse("1970-01-01 00:00:00");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void addSessionCookie(String cookie) {
@@ -143,7 +153,7 @@ public class VanillaAPI {
         public int Depth;
         public int CountDiscussions;
         public int CountComments;
-        public String DateMarkedRead;
+        public Date DateMarkedRead;
         public boolean AllowDiscussions;
         public boolean Archived;
         public String Name;
@@ -158,11 +168,11 @@ public class VanillaAPI {
         public String DisplayAs;
         public int InsertUserID;
         public int UpdateUserID;
-        public String DateInserted;
-        public String DateUpdated;
+        public Date DateInserted;
+        public Date DateUpdated;
         public int LastCommentID;
         public int LastDiscussionID;
-        public String LastDateInserted;
+        public Date LastDateInserted;
         public String AllowedDiscussionTypes;
         public String DefaultDiscussionType;
         public boolean AllowFileUploads;
@@ -176,7 +186,7 @@ public class VanillaAPI {
         public int LastUserID;
         public int LastDiscussionUserID;
         public String LastUrl;
-        public String DateLastComment;
+        public Date DateLastComment;
         public boolean Unfollow;
         public boolean Following;
         public boolean Read;
@@ -259,11 +269,11 @@ public class VanillaAPI {
                             break;
                         case "DateMarkedRead":
                             if (reader.peek() == JsonToken.NULL) {
-                                DateMarkedRead = "";
+                                DateMarkedRead = defaultDate;
                                 reader.nextNull();
                             }
                             else
-                                DateMarkedRead = reader.nextString();
+                                DateMarkedRead = df.parse(reader.nextString());
                             break;
                         case "AllowDiscussions":
                             if (reader.peek() == JsonToken.NULL) {
@@ -379,19 +389,19 @@ public class VanillaAPI {
                             break;
                         case "DateInserted":
                             if (reader.peek() == JsonToken.NULL) {
-                                DateInserted = "";
+                                DateInserted = defaultDate;
                                 reader.nextNull();
                             }
                             else
-                                DateInserted = reader.nextString();
+                                DateInserted = df.parse(reader.nextString());
                             break;
                         case "DateUpdated":
                             if (reader.peek() == JsonToken.NULL) {
-                                DateUpdated = "";
+                                DateUpdated = defaultDate;
                                 reader.nextNull();
                             }
                             else
-                                DateUpdated = reader.nextString();
+                                DateUpdated = df.parse(reader.nextString());
                             break;
                         case "LastCommentID":
                             if (reader.peek() == JsonToken.NULL) {
@@ -411,11 +421,11 @@ public class VanillaAPI {
                             break;
                         case "LastDateInserted":
                             if (reader.peek() == JsonToken.NULL) {
-                                LastDateInserted = "";
+                                LastDateInserted = defaultDate;
                                 reader.nextNull();
                             }
                             else
-                                LastDateInserted = reader.nextString();
+                                LastDateInserted = df.parse(reader.nextString());
                             break;
                         case "AllowedDiscussionTypes":
                             if (reader.peek() == JsonToken.NULL) {
@@ -519,11 +529,11 @@ public class VanillaAPI {
                             break;
                         case "DateLastComment":
                             if (reader.peek() == JsonToken.NULL) {
-                                DateLastComment = "";
+                                DateLastComment = defaultDate;
                                 reader.nextNull();
                             }
                             else
-                                DateLastComment = reader.nextString();
+                                DateLastComment = df.parse(reader.nextString());
                             break;
                         case "Unfollow":
                             if (reader.peek() == JsonToken.NULL) {
@@ -709,16 +719,16 @@ public class VanillaAPI {
         public boolean Closed;
         public boolean Announce;
         public boolean Sink;
-        public String DateInserted;
-        public String DateUpdated;
+        public Date DateInserted;
+        public Date DateUpdated;
         public String InsertIPAddress;
         public String UpdateIPAddress;
-        public String DateLastComment;
+        public Date DateLastComment;
         public int LastCommentUserID;
         public int Score;
         public int RegardingID;
         public int WatchUserID;
-        public String DateLastViewed;
+        public Date DateLastViewed;
         public boolean Dismissed;
         public boolean Bookmarked;
         public int CountCommentWatch;
@@ -728,9 +738,9 @@ public class VanillaAPI {
         public String CategoryUrlCode;
         public int PermissionCategoryID;
         public int FirstUserID;
-        public String FirstDate;
+        public Date FirstDate;
         public int LastUserID;
-        public String LastDate;
+        public Date LastDate;
         public boolean CountUnreadComments;
         public boolean Read;
         public String FirstName;
@@ -894,19 +904,19 @@ public class VanillaAPI {
                             break;
                         case "DateInserted":
                             if (reader.peek() == JsonToken.NULL) {
-                                DateInserted = "";
+                                DateInserted = defaultDate;
                                 reader.nextNull();
                             }
                             else
-                                DateInserted = reader.nextString();
+                                DateInserted = df.parse(reader.nextString());
                             break;
                         case "DateUpdated":
                             if (reader.peek() == JsonToken.NULL) {
-                                DateUpdated = "";
+                                DateUpdated = defaultDate;
                                 reader.nextNull();
                             }
                             else
-                                DateUpdated = reader.nextString();
+                                DateUpdated = df.parse(reader.nextString());
                             break;
                         case "InsertIPAddress":
                             if (reader.peek() == JsonToken.NULL) {
@@ -926,11 +936,11 @@ public class VanillaAPI {
                             break;
                         case "DateLastComment":
                             if (reader.peek() == JsonToken.NULL) {
-                                DateLastComment = "";
+                                DateLastComment = defaultDate;
                                 reader.nextNull();
                             }
                             else
-                                DateLastComment = reader.nextString();
+                                DateLastComment = df.parse(reader.nextString());
                             break;
                         case "LastCommentUserID":
                             if (reader.peek() == JsonToken.NULL) {
@@ -966,11 +976,11 @@ public class VanillaAPI {
                             break;
                         case "DateLastViewed":
                             if (reader.peek() == JsonToken.NULL) {
-                                DateLastViewed = "";
+                                DateLastViewed = defaultDate;
                                 reader.nextNull();
                             }
                             else
-                                DateLastViewed = reader.nextString();
+                                DateLastViewed = df.parse(reader.nextString());
                             break;
                         case "Dismissed":
                             if (reader.peek() == JsonToken.NULL) {
@@ -1046,11 +1056,11 @@ public class VanillaAPI {
                             break;
                         case "FirstDate":
                             if (reader.peek() == JsonToken.NULL) {
-                                FirstDate = "";
+                                FirstDate = defaultDate;
                                 reader.nextNull();
                             }
                             else
-                                FirstDate = reader.nextString();
+                                FirstDate = df.parse(reader.nextString());
                             break;
                         case "LastUserID":
                             if (reader.peek() == JsonToken.NULL) {
@@ -1062,11 +1072,11 @@ public class VanillaAPI {
                             break;
                         case "LastDate":
                             if (reader.peek() == JsonToken.NULL) {
-                                LastDate = "";
+                                LastDate = defaultDate;
                                 reader.nextNull();
                             }
                             else
-                                LastDate = reader.nextString();
+                                LastDate = df.parse(reader.nextString());
                             break;
                         case "CountUnreadComments":
                             if (reader.peek() == JsonToken.NULL) {
@@ -1223,9 +1233,9 @@ public class VanillaAPI {
         public int DeleteUserID;
         public String Body;
         public String Format;
-        public String DateInserted;
-        public String DateDeleted;
-        public String DateUpdated;
+        public Date DateInserted;
+        public Date DateDeleted;
+        public Date DateUpdated;
         public String InsertIPAddress;
         public String UpdateIPAddress;
         public boolean Flag;
@@ -1300,27 +1310,27 @@ public class VanillaAPI {
                             break;
                         case "DateInserted":
                             if (reader.peek() == JsonToken.NULL) {
-                                DateInserted = "";
+                                DateInserted = defaultDate;
                                 reader.nextNull();
                             }
                             else
-                                DateInserted = reader.nextString();
+                                DateInserted = df.parse(reader.nextString());
                             break;
                         case "DateDeleted":
                             if (reader.peek() == JsonToken.NULL) {
-                                DateDeleted = "";
+                                DateDeleted = defaultDate;
                                 reader.nextNull();
                             }
                             else
-                                DateDeleted = reader.nextString();
+                                DateDeleted = df.parse(reader.nextString());
                             break;
                         case "DateUpdated":
                             if (reader.peek() == JsonToken.NULL) {
-                                DateUpdated = "";
+                                DateUpdated = defaultDate;
                                 reader.nextNull();
                             }
                             else
-                                DateUpdated = reader.nextString();
+                                DateUpdated = df.parse(reader.nextString());
                             break;
                         case "InsertIPAddress":
                             if (reader.peek() == JsonToken.NULL) {

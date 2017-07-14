@@ -8,6 +8,8 @@ import android.widget.TextView;
 import org.cacophonie.cacompagnon.R;
 import org.cacophonie.cacompagnon.utils.VanillaAPI;
 
+import java.text.DateFormat;
+
 /**
  * Created by SMaiz on 12/07/17.
  */
@@ -17,6 +19,7 @@ public class DiscussionView extends LinearLayout {
     TextView startedBy = null;
     TextView lastUser = null;
     TextView date = null;
+    private DateFormat df;
 
     public DiscussionView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -39,12 +42,13 @@ public class DiscussionView extends LinearLayout {
         startedBy = (TextView) findViewById(R.id.disc_startedBy);
         lastUser = (TextView) findViewById(R.id.disc_lastUser);
         date = (TextView) findViewById(R.id.disc_date);
+        df = DateFormat.getDateInstance();
     }
 
     public void bind(VanillaAPI.Discussion discussion) {
         title.setText(discussion.Name);
         startedBy.setText(discussion.FirstName);
         lastUser.setText(discussion.LastName);
-        date.setText(discussion.DateInserted);
+        date.setText(df.format(discussion.DateInserted));
     }
 }

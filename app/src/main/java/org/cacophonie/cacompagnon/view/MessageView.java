@@ -10,6 +10,8 @@ import android.widget.TextView;
 import org.cacophonie.cacompagnon.R;
 import org.cacophonie.cacompagnon.utils.VanillaAPI;
 
+import java.text.DateFormat;
+
 /**
  * Created by SMaiz on 12/07/17.
  */
@@ -19,6 +21,7 @@ public class MessageView extends LinearLayout {
     TextView date = null;
     TextView body = null;
     ImageView photo = null;
+    private DateFormat df;
 
     public MessageView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -41,19 +44,20 @@ public class MessageView extends LinearLayout {
         body = (TextView) findViewById(R.id.msg_body);
         date = (TextView) findViewById(R.id.msg_date);
         photo = (ImageView) findViewById(R.id.msg_photo);
+        df = DateFormat.getDateInstance();
     }
 
     public void bind(VanillaAPI.Comment comment) {
         userName.setText(comment.InsertName);
         body.setText(comment.Body);
-        date.setText(comment.DateInserted);
+        date.setText(df.format(comment.DateInserted));
         // TODO: get picture
     }
 
     public void bind(VanillaAPI.Discussion disc) {
         userName.setText(disc.InsertName);
         body.setText(disc.Body);
-        date.setText(disc.DateInserted);
+        date.setText(df.format(disc.DateInserted));
         // TODO: get picture
     }
 }
