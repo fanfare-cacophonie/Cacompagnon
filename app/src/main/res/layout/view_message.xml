@@ -5,10 +5,10 @@
     android:layout_height="wrap_content">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:layout_weight=".35">
+        android:layout_weight=".20">
 
         <ImageView
             android:id="@+id/msg_photo"
@@ -32,10 +32,10 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
         android:orientation="horizontal"
-        android:layout_weight=".65">
+        android:layout_weight=".80">
 
         <TextView
             android:id="@+id/msg_body"
