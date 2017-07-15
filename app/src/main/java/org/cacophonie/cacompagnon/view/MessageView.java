@@ -7,6 +7,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.bumptech.glide.request.RequestOptions;
+
 import org.cacophonie.cacompagnon.R;
 import org.cacophonie.cacompagnon.utils.VanillaAPI;
 
@@ -51,13 +55,15 @@ public class MessageView extends LinearLayout {
         userName.setText(comment.InsertName);
         body.setText(comment.Body);
         date.setText(df.format(comment.DateInserted));
-        // TODO: get picture
+        if (!comment.InsertPhoto.isEmpty())
+            Glide.with(this).load(comment.InsertPhoto).apply(RequestOptions.circleCropTransform()).into(photo);
     }
 
     public void bind(VanillaAPI.Discussion disc) {
         userName.setText(disc.InsertName);
         body.setText(disc.Body);
         date.setText(df.format(disc.DateInserted));
-        // TODO: get picture
+        if (!disc.InsertPhoto.isEmpty())
+            Glide.with(this).load(disc.InsertPhoto).apply(RequestOptions.circleCropTransform()).into(photo);
     }
 }
