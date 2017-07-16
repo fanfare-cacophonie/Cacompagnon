@@ -3,7 +3,7 @@ Projet d'une application android pour la fanfare la Cacophonie.
 Réalisé par différents membres de cette fanfare étudiante Lyonnaise.
 # Cloner le projet
 git clone https://github.com/fanfare-cacophonie/Cacompagnon.git
-#Contenu prévu:
+# Contenu prévu:
 * Un calendrier contenant les différents évènements 
   - détail des évenements au clic
   - possibilité de valider sa présence à l'évenement
