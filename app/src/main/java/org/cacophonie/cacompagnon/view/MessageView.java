@@ -24,6 +24,7 @@ public class MessageView extends LinearLayout {
     TextView date = null;
     TextView body = null;
     ImageView photo = null;
+    private RequestOptions options = new RequestOptions().placeholder(R.drawable.ic_account_circle);
     private DateFormat df;
 
     public MessageView(Context context, AttributeSet attrs, int defStyle) {
@@ -57,15 +58,13 @@ public class MessageView extends LinearLayout {
         userName.setText(comment.InsertName);
         body.setText(comment.Body);
         date.setText(df.format(comment.DateInserted));
-        if (!comment.InsertPhoto.isEmpty())
-            Glide.with(this).load(comment.InsertPhoto).apply(RequestOptions.circleCropTransform()).into(photo);
+        Glide.with(this).load(comment.InsertPhoto).apply(options).apply(RequestOptions.circleCropTransform()).into(photo);
     }
 
     public void bind(VanillaAPI.Discussion disc) {
         userName.setText(disc.InsertName);
         body.setText(disc.Body);
         date.setText(df.format(disc.DateInserted));
-        if (!disc.InsertPhoto.isEmpty())
-            Glide.with(this).load(disc.InsertPhoto).apply(RequestOptions.circleCropTransform()).into(photo);
+        Glide.with(this).load(disc.InsertPhoto).apply(options).apply(RequestOptions.circleCropTransform()).into(photo);
     }
 }
