@@ -32,9 +32,12 @@ public class ThreadFragment extends Fragment implements VanillaAPI.Callback {
 
         // Create a new adapter
         adapter = new DiscussionFullAdapter();
+    }
 
-        MainActivity activity = (MainActivity) getActivity();
-        activity.getAPI().getDiscussion(getArguments().getInt("DiscussionID"), this);
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        ((MainActivity) getActivity()).getAPI().getDiscussion(getArguments().getInt("DiscussionID"), this);
     }
 
     @Override

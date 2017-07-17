@@ -56,8 +56,10 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(1).setChecked(true);
 
-        // Create the 1st fragment and display it
-        getSupportFragmentManager().beginTransaction().add(R.id.frame, new CategoriesFragment(), "CATEGORIES").commit();
+        if (savedInstanceState == null) {
+            // Create the 1st fragment and display it
+            getSupportFragmentManager().beginTransaction().add(R.id.frame, new CategoriesFragment(), "CATEGORIES").commit();
+        }
 
         api = new VanillaAPI("https://smaiz.fr/vanilla/api");
     }

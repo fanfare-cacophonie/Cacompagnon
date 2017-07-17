@@ -58,9 +58,12 @@ public class CategoryFragment extends Fragment implements VanillaAPI.Callback {
         // Create a new adapter
         adapter = new CategoryFullAdapter();
         adapter.setClickListener(new clickListener());
+    }
 
-        MainActivity activity = (MainActivity) getActivity();
-        activity.getAPI().getCategory(getArguments().getInt("CategoryID"), this);
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        ((MainActivity) getActivity()).getAPI().getCategory(getArguments().getInt("CategoryID"), this);
     }
 
     @Override
