@@ -1,9 +1,8 @@
 package org.cacophonie.cacompagnon.view;
 
-import android.content.Context;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import org.cacophonie.cacompagnon.utils.VanillaAPI;
@@ -12,82 +11,67 @@ import org.cacophonie.cacompagnon.utils.VanillaAPI;
  * Created by SMaiz on 12/07/17.
  */
 
-public class DiscussionFullAdapter extends BaseAdapter {
-    private Context mContext;
+public class DiscussionFullAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private VanillaAPI.DiscussionFull mDiscussion = null;
 
     public static final int TITLE = 0;
-    public static final int PREMIER = 1;
+    public static final int FIRST = 1;
     public static final int MESSAGE = 2;
 
-    public DiscussionFullAdapter(Context context) {
-        mContext = context;
-    }
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        private View view;
 
-    @Override
-    public int getViewTypeCount() {
-        return 3;
+        public ViewHolder(View v) {
+            super(v);
+            view = v;
+        }
+
+        public View getView() {
+            return view;
+        }
     }
 
     @Override
     public int getItemViewType(int i) {
-        return i == 0 ? TITLE : i == 1 ? PREMIER : MESSAGE;
+        return i == 0 ? TITLE : i == 1 ? FIRST : MESSAGE;
     }
 
     @Override
-    public int getCount() {
+    public int getItemCount() {
         if (mDiscussion == null)
             return 0;
         return mDiscussion.Comments.size() + 2;
     }
 
-    @Override
-    public Object getItem(int i) {
-        if (i == 0)
-            return mDiscussion.Discussion.Name;
-        if (i == 1)
-            return mDiscussion.Discussion;
-        return mDiscussion.Comments.get(i - 2);
-    }
-
-    @Override
-    public long getItemId(int i) {
-        return i;
-    }
-
-    @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
-        View v = null;
-        int type = getItemViewType(i);
-
-        // If no view is passed, create a new one
-        if (view == null) {
-            switch (type) {
-                case TITLE:
-                    v = new TextView(mContext);
-                    break;
-                case PREMIER:
-                case MESSAGE:
-                    v = new MessageView(mContext);
-                    break;
-            }
-        }
-        else {
-            v = view;
-        }
-
-        switch (type) {
+    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, final int position) {
+        switch (viewHolder.getItemViewType()) {
             case TITLE:
-                ((TextView) v).setText((String) getItem(i));
+                ((TextView) ((ViewHolder) viewHolder).getView()).setText(mDiscussion.Discussion.Name);
                 break;
-            case PREMIER:
-                ((MessageView) v).bind((VanillaAPI.Discussion) getItem(i));
+            case FIRST:
+                ((MessageView) ((ViewHolder) viewHolder).getView()).bind(mDiscussion.Discussion);
                 break;
+            default:
             case MESSAGE:
-                ((MessageView) v).bind((VanillaAPI.Comment) getItem(i));
+                ((MessageView) ((ViewHolder) viewHolder).getView()).bind(mDiscussion.Comments.get(position - 2));
                 break;
         }
-        return v;
+    }
+
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View v;
+        switch (viewType) {
+            case TITLE:
+                v = new TextView(parent.getContext());
+                break;
+            default:
+            case FIRST:
+            case MESSAGE:
+                v = new MessageView(parent.getContext());
+                break;
+        }
+        return new ViewHolder(v);
     }
 
     public void bind(VanillaAPI.DiscussionFull discussion) {

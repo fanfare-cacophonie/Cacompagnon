@@ -2,6 +2,8 @@ package org.cacophonie.cacompagnon.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.TypedValue;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -43,6 +45,13 @@ public class DiscussionView extends LinearLayout {
         lastUser = (TextView) findViewById(R.id.disc_lastUser);
         date = (TextView) findViewById(R.id.disc_date);
         df = DateFormat.getDateInstance();
+
+		setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        setOrientation(LinearLayout.VERTICAL);
+
+        TypedValue outValue = new TypedValue();
+        getContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+        setBackgroundResource(outValue.resourceId);
     }
 
     public void bind(VanillaAPI.Discussion discussion) {

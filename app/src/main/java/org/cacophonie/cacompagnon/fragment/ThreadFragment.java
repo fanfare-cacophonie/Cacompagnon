@@ -3,7 +3,8 @@ package org.cacophonie.cacompagnon.fragment;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.ListFragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,14 +12,15 @@ import android.view.ViewGroup;
 import org.cacophonie.cacompagnon.R;
 import org.cacophonie.cacompagnon.activity.MainActivity;
 import org.cacophonie.cacompagnon.utils.VanillaAPI;
-import org.cacophonie.cacompagnon.view.CategoryFullAdapter;
 import org.cacophonie.cacompagnon.view.DiscussionFullAdapter;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ThreadFragment extends ListFragment implements VanillaAPI.Callback {
+public class ThreadFragment extends Fragment implements VanillaAPI.Callback {
     private DiscussionFullAdapter adapter = null;
+    private RecyclerView recyclerView;
+    private RecyclerView.LayoutManager layoutManager;
 
     public ThreadFragment() {
         // Required empty public constructor
@@ -29,9 +31,7 @@ public class ThreadFragment extends ListFragment implements VanillaAPI.Callback 
         super.onCreate(savedInstanceState);
 
         // Create a new adapter
-        adapter = new DiscussionFullAdapter(getContext());
-        // Use it
-        setListAdapter(adapter);
+        adapter = new DiscussionFullAdapter();
 
         MainActivity activity = (MainActivity) getActivity();
         activity.getAPI().getDiscussion(getArguments().getInt("DiscussionID"), this);
@@ -39,7 +39,15 @@ public class ThreadFragment extends ListFragment implements VanillaAPI.Callback 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_thread, container, false);
+        View rootView =  inflater.inflate(R.layout.fragment_list, container, false);
+
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerview);
+
+        layoutManager = new LinearLayoutManager(getActivity());
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(adapter);
+
+        return rootView;
     }
 
     @Override

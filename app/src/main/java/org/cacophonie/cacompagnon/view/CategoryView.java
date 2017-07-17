@@ -2,6 +2,8 @@ package org.cacophonie.cacompagnon.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.TypedValue;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -35,6 +37,13 @@ public class CategoryView extends LinearLayout {
         inflate(getContext(), R.layout.view_category, this);
         title = (TextView) findViewById(R.id.cat_title);
         desc = (TextView) findViewById(R.id.cat_desc);
+
+        setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        setOrientation(LinearLayout.VERTICAL);
+
+        TypedValue outValue = new TypedValue();
+        getContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+        setBackgroundResource(outValue.resourceId);
     }
 
     public void bind(VanillaAPI.Category category) {

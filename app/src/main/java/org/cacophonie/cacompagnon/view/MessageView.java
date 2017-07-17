@@ -2,13 +2,12 @@ package org.cacophonie.cacompagnon.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
 
 import org.cacophonie.cacompagnon.R;
@@ -49,6 +48,9 @@ public class MessageView extends LinearLayout {
         date = (TextView) findViewById(R.id.msg_date);
         photo = (ImageView) findViewById(R.id.msg_photo);
         df = DateFormat.getDateInstance();
+
+        setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        setOrientation(LinearLayout.HORIZONTAL);
     }
 
     public void bind(VanillaAPI.Comment comment) {
